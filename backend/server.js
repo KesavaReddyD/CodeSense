@@ -1,7 +1,7 @@
 // server.js
-const app = require('./app');
-const connectDB = require('./config/db');
-const dotenv = require('dotenv');
+import app from './app.js';
+import connectDB from './config/db.js';
+import dotenv from 'dotenv';
 
 // Load environment variables
 dotenv.config();

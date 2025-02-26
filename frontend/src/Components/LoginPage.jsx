@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import { useAuth } from '../Context/AuthContext';
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
+import {toast} from 'react-hot-toast';
 
 const LoginPage = () => {
 
-    const { setUserType, setUsername } = useAuth();
+    const auth = useAuth();
     const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    role: 'student',
   });
 
   const [errors, setErrors] = useState({});
@@ -34,17 +36,28 @@ const LoginPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (validateForm()) {
       // Handle login logic here
       console.log('Login attempt:', formData);
+      try{
+        const lot = toast.loading("signing in");
+        await auth?.login(formData.email, formData.password, formData.role);
+        toast.dismiss(lot);
+        toast.success("logged in");
+        navigate('/dashboard');
+      }catch(err){
+        console.log(err);
+        toast.dismiss();
+        toast.error("failed to login");
+      }
       // need to send to backend api to validate the login credentials 
       //then we need to perform these
-      setUserType(type); // Set user type in context
-      setUsername(name); // Set username in context
-      navigate("/dashboard"); // Redirect to dashboard
+      // setUserType(formData.role); // Set user type in context
+      // setUsername(formData.email); // Set username in context
+      // Redirect to dashboard
     }
   };
 
@@ -145,6 +158,26 @@ const LoginPage = () => {
                 )}
               </div>
             </div>
+
+            {/* Role selection */}
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                Role
+              </label>
+              <div className="mt-1">
+                <select
+                  id="role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="student">Student</option>
+                  <option value="teacher">Teacher</option>
+                </select>
+              </div>
+            </div>
+
 
             {/* Remember me & Forgot password */}
             <div className="flex items-center justify-between">

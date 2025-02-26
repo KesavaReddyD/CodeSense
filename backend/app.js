@@ -1,25 +1,32 @@
 // app.js
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
 // Load environment variables
 dotenv.config();
 
 // Import routes
-// const authRoutes = require('./routes/auth');
-// const questionRoutes = require('./routes/question');
-// const submissionRoutes = require('./routes/submission');
+import authRouter from './routes/authRouter.js';
+import cookieParser from 'cookie-parser';
+// import questionRoutes from './routes/question.js';
+// import submissionRoutes from './routes/submission.js';
 
 // Initialize Express app
 const app = express();
 
+const corsconfig = {
+  origin: "http://localhost:5173",
+  credentials: true
+}
+
 // Middleware
-app.use(cors()); // Enable CORS
+app.use(cors( corsconfig )); // Enable CORS
 app.use(express.json()); // Parse JSON bodies
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 // Routes
-// app.use('/api/auth', authRoutes); // Authentication routes
+app.use('/api/auth', authRouter); // Authentication routes
 // app.use('/api/questions', questionRoutes); // Question-related routes
 // app.use('/api/submissions', submissionRoutes); // Submission-related routes
 
@@ -39,4 +46,4 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-module.exports = app;
+export default app;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './Components/LandingPage';
 import LoginPage from './Components/LoginPage';
@@ -10,7 +10,8 @@ import CodeSubmissionPage from './Components/CodeSubmissionPage';
 import QuizComponent from './Components/QuizComponent';
 
 const App = () => {
-  const {userType} = useAuth();
+  const auth = useAuth();
+  
   return (
     <Router>
       <Routes>
@@ -19,13 +20,14 @@ const App = () => {
         <Route path="/signup" element={<SignupPage />} />
         <Route 
           path="/dashboard"
+
           // element={userType && userType === "teacher" ? <TeacherDashboard/> : <StudentDashboard/>}
           // element={<TeacherDashboard />}
-          element={<StudentDashboard />}
+          element={auth?.user?.role === "teacher" ? <TeacherDashboard/> : <StudentDashboard />}
         />
         <Route path='/code' element={<CodeSubmissionPage />} />
         <Route path='/quiz' element={<QuizComponent />} />
-        <Route path="*" element={<Navigate to={userType ? "/dashboard" : "/login"} />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );

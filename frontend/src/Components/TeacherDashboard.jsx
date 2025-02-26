@@ -3,11 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import Create from './TeacherDash/Create';
 import View from './TeacherDash/View';
 import StudentEvaluation from './TeacherDash/StudentEvaluation';
+import { useAuth } from '../Context/AuthContext';
+import {toast} from 'react-hot-toast';
 
 const TeacherDashboard = () => {
   const [activeOption, setActiveOption] = useState('create');
   const navigate = useNavigate();
-  const username = "John Doe"; // Replace with actual user data
+  // Replace with actual user data
+  const auth = useAuth();
+  const username = auth?.user?.name;
 
   const sidebarOptions = [
     { id: 'create', label: 'Create New Test', icon: (
@@ -27,9 +31,18 @@ const TeacherDashboard = () => {
     )}
   ];
 
-  const handleLogout = () => {
-    // Add logout logic here
-    navigate('/login');
+  const handleLogout = async () => {
+    try{
+      toast.loading("logging out");
+      await auth?.logout();
+      toast.dismiss();
+      toast.success("logged out");
+      navigate('/login');
+    }catch(err){
+      toast.dismiss();
+      toast.error("failed");
+      console.log(err);
+    }
   };
 
   const renderContent = () => {
@@ -52,54 +65,67 @@ const TeacherDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg">
-        <div className="p-4">
-          <h1 className="text-2xl font-bold text-blue-600">CodeSense</h1>
-        </div>
-        <nav className="mt-4">
-          {sidebarOptions.map((option) => (
-            <button
-              key={option.id}
-              onClick={() => setActiveOption(option.id)}
-              className={`w-full flex items-center px-6 py-3 text-left ${
-                activeOption === option.id
-                  ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              {option.icon}
-              <span className="ml-2">{option.label}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Top Navigation */}
-        <header className="bg-white shadow-sm">
-          <div className="flex justify-between items-center px-6 py-4">
-            <h2 className="text-xl font-semibold text-gray-800">Dashboard</h2>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-600">{username}</span>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Logout
-              </button>
-            </div>
+    auth?.isLoggedIn ? (
+      <div className="min-h-screen bg-gray-100 flex">
+        {/* Sidebar */}
+        <div className="w-64 bg-white shadow-lg">
+          <div className="p-4">
+            <h1 className="text-2xl font-bold text-blue-600">CodeSense</h1>
           </div>
-        </header>
+          <nav className="mt-4">
+            {sidebarOptions.map((option) => (
+              <button
+                key={option.id}
+                onClick={() => setActiveOption(option.id)}
+                className={`w-full flex items-center px-6 py-3 text-left ${
+                  activeOption === option.id
+                    ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {option.icon}
+                <span className="ml-2">{option.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto bg-gray-50">
-          {renderContent()}
-        </main>
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col">
+          {/* Top Navigation */}
+          <header className="bg-white shadow-sm">
+            <div className="flex justify-between items-center px-6 py-4">
+              <h2 className="text-xl font-semibold text-gray-800">Dashboard</h2>
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-600">{username}</span>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Content Area */}
+          <main className="flex-1 overflow-y-auto bg-gray-50">
+            {renderContent()}
+          </main>
+        </div>
+      </div> 
+    ) : (
+      <div className="flex-1 flex flex-col justify-center items-center bg-gray-100 min-h-screen">
+        <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+          <p className="text-xl mb-4">You must login to continue.</p>
+          <Link to='/'>
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Home
+            </button>
+          </Link>
+        </div>
       </div>
-    </div>
+    )
   );
 };
 

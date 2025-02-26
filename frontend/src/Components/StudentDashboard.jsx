@@ -1,6 +1,7 @@
 import { useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
+import {toast} from 'react-hot-toast';
 
 const mockQuestions = [
   {
@@ -17,19 +18,34 @@ const mockQuestions = [
 ];
 
 export default function StudentDashboard() {
-  const { user, logout } = useAuth();
+  const auth = useAuth();
   const navigate = useNavigate();
 
+  const handleLogout = async () => {
+    try{
+      toast.loading("logging out");
+      await auth?.logout();
+      toast.dismiss();
+      toast.success("logged out");
+      navigate('/login');
+    }catch(err){
+      toast.dismiss();
+      toast.error("failed");
+      console.log(err);
+    }
+  };
+
   return (
+    auth?.isLoggedIn ? (
     <div className="bg-gray-50 min-h-screen">
       {/* Navbar */}
       <nav className="bg-white shadow-sm py-4 px-6 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Student Dashboard</h1>
         <div className="flex items-center space-x-4">
-          <span className="text-gray-700 font-medium">{user?.username}</span>
+          <span className="text-gray-700 font-medium">{auth?.user?.name}</span>
           <button
             className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-            onClick={logout}
+            onClick={handleLogout}
           >
             Logout
           </button>
@@ -54,5 +70,17 @@ export default function StudentDashboard() {
         </div>
       </div>
     </div>
+  ):
+  <div className="flex-1 flex flex-col justify-center items-center bg-gray-100 min-h-screen">
+        <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+          <p className="text-xl mb-4">You must login to continue.</p>
+          <Link to='/'>
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Home
+            </button>
+          </Link>
+        </div>
+      </div>
+
   );
 }

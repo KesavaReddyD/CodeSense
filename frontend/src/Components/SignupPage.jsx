@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { useAuth } from '../Context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
-    username: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -10,14 +13,17 @@ const SignupPage = () => {
     institution: ''
   });
 
+  const auth = useAuth();
+  const navigate = useNavigate();
+
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
     const newErrors = {};
     
     // Username validation
-    if (formData.username.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters long';
+    if (formData.name.length < 3) {
+      newErrors.name = 'Username must be at least 3 characters long';
     }
 
     // Email validation
@@ -27,8 +33,8 @@ const SignupPage = () => {
     }
 
     // Password validation
-    if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters long';
+    if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters long';
     }
 
     // Confirm password validation
@@ -45,12 +51,28 @@ const SignupPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (validateForm()) {
       // Handle signup logic here
       console.log('Form submitted:', formData);
+      try{
+        const lot = toast.loading("signing up");
+        await auth?.signup(formData.name, formData.email, formData.password, formData.role, formData.institution);
+        toast.dismiss(lot);
+        navigate('/dashboard');
+      }catch(err){
+        //console.log(err.response.status);
+        toast.dismiss();
+        if(err?.response?.status === 409){
+          toast.success("User already exists!!");
+          navigate('/login');
+        }
+        else{
+          toast.error("failed to sign up");
+        }
+      }
     }
   };
 
@@ -88,24 +110,24 @@ const SignupPage = () => {
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Username field */}
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                Username
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                name
               </label>
               <div className="mt-1">
                 <input
-                  id="username"
-                  name="username"
+                  id="name"
+                  name="name"
                   type="text"
                   required
                   className={`appearance-none block w-full px-3 py-2 border ${
-                    errors.username ? 'border-red-500' : 'border-gray-300'
+                    errors.name ? 'border-red-500' : 'border-gray-300'
                   } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
-                  value={formData.username}
+                  value={formData.name}
                   onChange={handleChange}
                   placeholder="Enter your username"
                 />
-                {errors.username && (
-                  <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
                 )}
               </div>
             </div>
