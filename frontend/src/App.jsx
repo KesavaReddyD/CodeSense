@@ -25,7 +25,7 @@ const App = () => {
           // element={<TeacherDashboard />}
           element={auth?.user?.role === "teacher" ? <TeacherDashboard/> : <StudentDashboard />}
         />
-        <Route path='/code' element={<CodeSubmissionPage />} />
+        <Route path='/question/:questionId' element={<CodeSubmissionPage />} />
         <Route path='/quiz' element={<QuizComponent />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

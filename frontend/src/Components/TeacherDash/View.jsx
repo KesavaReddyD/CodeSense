@@ -1,27 +1,29 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import {toast} from "react-hot-toast";
 
 const View = () => {
-    const [questions, setQuestions] = useState([
-        {
-            id: 1,
-            title: "Two Sum Problem",
-            description: "Find two numbers in array that add up to target",
-            difficulty: "Easy",
-            testCases: [
-                { input: "[2,7,11,15], 9", expectedOutput: "[0,1]" },
-                { input: "[3,2,4], 6", expectedOutput: "[1,2]" },
-            ],
-            dateCreated: "2025-02-01",
-        },
-        {
-            id: 2,
-            title: "Binary Tree Traversal",
-            description: "Implement inorder traversal of binary tree",
-            difficulty: "Medium",
-            testCases: [{ input: "[1,null,2,3]", expectedOutput: "[1,3,2]" }],
-            dateCreated: "2025-02-03",
-        },
-    ]);
+
+
+    const [questions, setQuestions] = useState([]);
+
+    useEffect(() => {
+        const fetchQuestions = async () => {
+        
+            const data = await axios.get('/questions/all', {
+                withCredentials: true
+            });
+            if(data.status !== 200){
+                throw new Error("Unable to fetch questions");
+            }
+            // console.log(data);
+            setQuestions(data.data);
+        }
+        fetchQuestions();
+    }, [])
+
+
+    
 
     const difficulties = [
         { value: 'Easy', color: 'bg-green-100 text-green-800' },
@@ -45,13 +47,40 @@ const View = () => {
         setIsEditModalOpen(true);
     };
 
-    const handleUpdate = (e) => {
+    const handleDelete = async (question) =>{
+        try{
+            const lot = toast.loading("Deleting question...");
+            await axios.delete(`/questions/delete/${question.id}`, {
+                withCredentials: true
+            });
+            toast.dismiss(lot);
+            toast.success("Question deleted successfully");
+            setQuestions(questions.filter((q) => q.id !== question.id));
+        }catch(error){
+            toast.dismiss();
+            toast.error("Error deleting question");
+            console.error("Error deleting question:", error);
+        }
+    };
+
+    const handleUpdate = async (e) => {
         e.preventDefault();
-        setQuestions(
-            questions.map((q) =>
-                q.id === editingQuestion.id ? editingQuestion : q
-            )
-        );
+        try {
+            const response = await axios.put(`/questions/update/${editingQuestion.id}`, editingQuestion, {
+            withCredentials: true,
+            });
+            if (response.status !== 200) {
+            throw new Error("Unable to update question");
+            }
+            setQuestions(
+                questions.map((q) =>
+                    q.id === editingQuestion.id ? editingQuestion : q
+                )
+            );
+        } catch (error) {
+            console.error("Error updating question:", error);
+        }
+        
         setIsEditModalOpen(false);
     };
 
@@ -94,7 +123,7 @@ const View = () => {
                         <div className="px-6 py-6 space-y-6">
                             <div>
                                 <h3 className="text-lg font-semibold text-gray-900">
-                                    {viewingQuestion.title}
+                                    {viewingQuestion.question}
                                 </h3>
                                 <span
                                     className={`mt-2 inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${getDifficultyColor(
@@ -192,7 +221,7 @@ const View = () => {
                                 <div className="flex items-center justify-between">
                                     <div className="flex-1">
                                         <h3 className="text-lg font-medium text-gray-900">
-                                            {question.title}
+                                            {question.question}
                                         </h3>
                                         <p className="mt-1 text-sm text-gray-500">
                                             {question.description}
@@ -224,6 +253,11 @@ const View = () => {
                                         >
                                             View
                                         </button>
+                                        {/* i want to add the delete button */}
+                                        <button className="text-gray-600 hover:text-red-600"
+                                            onClick={() => handleDelete(question)}>
+                                            Delete
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -240,7 +274,7 @@ const View = () => {
                                 Edit Test Question
                             </h2>
                             <button
-                                onClick={() => setIsModalOpen(false)}
+                                onClick={() => setIsEditModalOpen(false)}
                                 className="text-gray-500 hover:text-gray-700"
                             >
                                 ✕
@@ -256,11 +290,11 @@ const View = () => {
                                     <input
                                         type="text"
                                         className="mt-1 w-full rounded-md border border-gray-300 px-4 py-2 text-gray-900"
-                                        value={editingQuestion.title}
+                                        value={editingQuestion.question}
                                         onChange={(e) =>
                                             setEditingQuestion({
                                                 ...editingQuestion,
-                                                title: e.target.value,
+                                                question: e.target.value,
                                             })
                                         }
                                     />

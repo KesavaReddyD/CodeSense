@@ -1,7 +1,8 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 import {toast} from 'react-hot-toast';
+import axios from "axios";
 
 const mockQuestions = [
   {
@@ -17,9 +18,28 @@ const mockQuestions = [
   },
 ];
 
+
 export default function StudentDashboard() {
   const auth = useAuth();
   const navigate = useNavigate();
+  const [questions, setQuestions] = useState([]);
+
+  useEffect(() => {
+    if(!auth?.isLoggedIn){
+      navigate('/login');
+    }
+    const fetchQuestions = async () => {
+      try{
+        const res = await axios.get('/questions/all');
+        setQuestions(res.data);
+      }
+      catch(err){
+        console.log(err);
+      }
+    }
+    fetchQuestions();
+  },[]);
+
 
   const handleLogout = async () => {
     try{
@@ -56,13 +76,13 @@ export default function StudentDashboard() {
       <div className="max-w-4xl mx-auto px-4 py-6">
         <h2 className="text-3xl font-bold text-gray-900 mb-4">Active Tests</h2>
         <div className="grid grid-cols-1 gap-4">
-          {mockQuestions.map((question) => (
+          {questions.map((question) => (
             <div
               key={question.id}
               className="bg-white rounded-lg p-4 shadow-md cursor-pointer hover:bg-gray-100 transition"
               onClick={() => navigate(`/question/${question.id}`)}
             >
-              <h3 className="text-xl font-bold text-gray-900">{question.title}</h3>
+              <h3 className="text-xl font-bold text-gray-900">{question.question}</h3>
               <p className="text-gray-600">{question.description}</p>
               <span className="text-blue-600 font-medium">Difficulty: {question.difficulty}</span>
             </div>

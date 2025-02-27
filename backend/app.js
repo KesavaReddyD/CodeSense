@@ -9,7 +9,7 @@ dotenv.config();
 // Import routes
 import authRouter from './routes/authRouter.js';
 import cookieParser from 'cookie-parser';
-// import questionRoutes from './routes/question.js';
+import questionRouter from './routes/questionRouter.js'
 // import submissionRoutes from './routes/submission.js';
 
 // Initialize Express app
@@ -27,8 +27,8 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 
 // Routes
 app.use('/api/auth', authRouter); // Authentication routes
-// app.use('/api/questions', questionRoutes); // Question-related routes
-// app.use('/api/submissions', submissionRoutes); // Submission-related routes
+app.use('/api/questions', questionRouter); // Question-related routes
+// app.use('/api/code', submissionRoutes); // Submission-related routes
 
 // Health check endpoint
 app.get('/health', (req, res) => {

@@ -6,6 +6,7 @@ const appRouter = Router();
 
 // appRouter.use('/users', userRouter);
 appRouter.use('/users', authRouter);
+appRouter.use('/questions', )
     
 
 export default appRouter;

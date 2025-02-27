@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Play, Send } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
+import { useAuth } from '../Context/AuthContext';
+import axios from 'axios';
 
 const SUPPORTED_LANGUAGES = [
   { id: 'python', name: 'Python' },
@@ -21,6 +23,8 @@ const CodeSubmissionPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editorTheme, setEditorTheme] = useState('light');
 
+  const auth = useAuth();
+
   // Default starter code for different languages
   const starterCode = {
     python: '# Write your Python code here\n\ndef solution():\n    pass',
@@ -34,23 +38,33 @@ const CodeSubmissionPage = () => {
     setCode(starterCode[language]);
   }, [language]);
 
+
+
   useEffect(() => {
+
+    if(auth?.isLoggedIn === false){
+      navigate('/login');
+    }
+
     const fetchQuestion = async () => {
       try {
-        const response = await fetch(`/api/questions/${questionId}`);
-        const data = await response.json();
-        setQuestion(data);
+        // console.log('Fetching question:', questionId);
+        const response = await axios.get(`/questions/question/${questionId}`,{
+          withCredentials: true
+        });
+        console.log(response.data);
+        setQuestion(response.data);
         // If question specifies a language, set it
         if (data.language && SUPPORTED_LANGUAGES.find(l => l.id === data.language)) {
           setLanguage(data.language);
         }
       } catch (error) {
-        console.error('Error fetching question:', error);
+        console.log('Error fetching question:', error);
       }
     };
 
     fetchQuestion();
-  }, [questionId]);
+  }, []);
 
   const handleRunCode = async () => {
     setIsRunning(true);
@@ -78,15 +92,14 @@ const CodeSubmissionPage = () => {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch(`/api/submit/${questionId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code, language }),
+      const response = await axios.post(`/questions/${questionId}/submit`, {
+        code,
+        language
+      },{
+        withCredentials: true
       });
-      
-      const data = await response.json();
+      const data = response.data;
+      console.log('Submission result:', data);
       
       if (data.next_steps) {
         navigate(`/questions/${questionId}/ai-assessment/${data.next_steps.submission_id}`);
@@ -127,26 +140,35 @@ const CodeSubmissionPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
         <div className="flex gap-8">
           {/* Left Panel - Question Details */}
-          <div className="w-2/5 space-y-6">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h1 className="text-2xl font-bold text-gray-900">
-                {question?.title || 'Loading...'}
-              </h1>
-              <div className="mt-4 text-gray-600">
-                {question?.description || 'Loading...'}
-              </div>
-              {question?.examples && (
-                <div className="mt-6">
-                  <h2 className="text-lg font-medium text-gray-900">Examples:</h2>
-                  <pre className="mt-2 p-4 bg-gray-50 rounded-md overflow-x-auto">
-                    {question.examples}
-                  </pre>
+                <div className="w-2/5 space-y-6">
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <h1 className="text-2xl font-bold text-gray-900">
+                  {question?.question || 'Loading...'}
+                  </h1>
+                  <div className="mt-4 text-gray-600">
+                  {question?.description || 'Loading...'}
+                  </div>
+                  <div className="mt-4 text-gray-600">
+                  <strong>Difficulty:</strong> {question?.difficulty || 'Loading...'}
+                  </div>
+                  {question?.testCases && (
+                  <div className="mt-6">
+                    <h2 className="text-lg font-medium text-gray-900">Test Cases:</h2>
+                    <ul className="mt-2 space-y-2">
+                    {question?.testCases.map((testCase, index) => (
+                      <li key={index} className="p-4 bg-gray-50 rounded-md">
+                      <strong>Input:</strong> {testCase.input}
+                      <br />
+                      <strong>Expected Output:</strong> {testCase.expectedOutput}
+                      </li>
+                    ))}
+                    </ul>
+                  </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
+                </div>
 
-          {/* Right Panel - Code Editor and Console */}
+                {/* Right Panel - Code Editor and Console */}
           <div className="w-3/5 space-y-6">
             {/* Editor Controls */}
             <div className="bg-white rounded-lg shadow-sm p-4">

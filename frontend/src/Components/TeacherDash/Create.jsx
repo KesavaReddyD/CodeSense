@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
+import { createquestionapihit } from '../../helpers/api_communicator.js';
 
 const Create = () => {
   const [formData, setFormData] = useState({
@@ -14,9 +16,25 @@ const Create = () => {
     { value: 'Hard', color: 'bg-red-100 text-red-800' }
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Submitted:', formData);
+    // console.log('Submitted:', formData);
+    try{
+      const lot = toast.loading("creating!!")
+      await createquestionapihit(formData.question, formData.description, formData.difficulty, formData.testCases);
+      toast.dismiss(lot);
+      toast.success('Question created successfully!');
+      setFormData({
+        question: '',
+        description: '',
+        difficulty: 'Easy',
+        testCases: [{ input: '', expectedOutput: '' }]
+      });
+    }catch(error){
+      console.log(error);
+      toast.dismiss();
+      toast.error('Failed to create question');
+    }
   };
 
   const updateTestCase = (index, field, value) => {
@@ -37,7 +55,7 @@ const Create = () => {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-sm">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-900">Create New Test</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Create New Question</h2>
           </div>
           
           <div className="px-6 py-6">
@@ -117,7 +135,7 @@ const Create = () => {
                 type="submit"
                 className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
               >
-                Submit Test
+                Create Question
               </button>
             </form>
           </div>

@@ -23,6 +23,8 @@ export const loginapihit = async (email, password, role) => {
    return data;
 }
 
+
+
 export const verifyapihit = async () => {
    const data = await axios.get('/auth/authverify', {
       withCredentials: true
@@ -42,3 +44,13 @@ export const logoutapihit = async () => {
     }
     return data.data;
 }
+
+export const createquestionapihit = async (question, description, difficulty, testCases) => {
+      const data = await axios.post('/questions/add', {question, description, difficulty, testCases}, {
+         withCredentials: true
+      });
+      if(data.status !== 200){
+         throw new Error("Unable to add question");
+      }
+      return data.data;
+   }
