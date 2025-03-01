@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { addQuestion, deleteQuestionById, getAllQuestions, getQuestion, updateQuestionById } from "../controllers/questionController.js";
+import { addQuestion, deleteQuestionById, getAllQuestions, getQuestion, getQuestionById, updateQuestionById } from "../controllers/questionController.js";
 import { codeSubmission } from "../controllers/codeSubmission.js";
 
 const questionRouter = Router();
 
 questionRouter.get('/all', getAllQuestions);
+questionRouter.get('/questionbyid/:id', getQuestionById);
 questionRouter.get('/question/:id', getQuestion);
 questionRouter.post('/add', addQuestion);
 questionRouter.put('/update/:id', updateQuestionById);

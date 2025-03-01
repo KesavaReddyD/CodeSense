@@ -10,6 +10,16 @@ export const getAllQuestions = async (req, res, next) => {
     }
 }
 
+export const getQuestionById = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const question = await Question.findById(id);
+        res.status(200).json(question);
+    } catch (error) {
+        res.json({ message: "error", cause: error.message });
+    }
+}
+
 export const getQuestion = async (req, res, next) => {
     try {
         const { id } = req.params;

@@ -33,6 +33,7 @@ const App = () => {
         <Route path='/questions/:questionId/ai-assessment/:submissionId' element={<QuizComponent />} />
         <Route path='/quiz' element={<QuizComponent />} />
         <Route path="*" element={<Navigate to="/" />} />
+        <Route path='/dash' element={<TeacherDashboard />} />
       </Routes>
     </Router>
   );

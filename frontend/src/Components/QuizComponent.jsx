@@ -165,8 +165,8 @@ const QuizComponent = () => {
         formattedAnswers,
       });
       console.log(response);
-      navigate('/dashboard');
-      // navigate(`/submission/${submissionId}/results`);
+      // navigate('/dashboard');
+      navigate(`/response/${submissionId}`);
     } catch (error) {
       console.error('Error submitting quiz:', error);
     } finally {

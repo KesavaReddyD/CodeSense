@@ -13,6 +13,8 @@ const generativeQnASchema = new mongoose.Schema({
 
 const submissionSchema = new mongoose.Schema({
   student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  username: { type: String, required: true },
+  email: { type: String, required: true },
   question: { type: mongoose.Schema.Types.ObjectId, ref: 'Question', required: true },
   code: { type: String, required: true },
   language: { type: String, required: true },

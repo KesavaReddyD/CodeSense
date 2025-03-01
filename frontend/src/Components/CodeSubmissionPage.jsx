@@ -98,8 +98,10 @@ const CodeSubmissionPage = () => {
     
     try {
       const lot = toast.loading('Submitting code...');
+      const username = auth?.user?.name;
       const email = auth?.user?.email;
       const response = await axios.post(`/questions/${questionId}/submit`, {
+        username,
         email,
         questionId,
         code,

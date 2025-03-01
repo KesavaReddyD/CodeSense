@@ -7,7 +7,7 @@ import { generateFeedback } from '../gemini/feedback.js';
 export const codeSubmission = async (req, res, next) => {
   try {
     // const { student, question, code, language, generativeQnA, grade, evaluatedByTeacher } = req.body;
-    const {email, questionId, code, language} = req.body;
+    const {username, email, questionId, code, language} = req.body;
 
     // Find the student by email
     const student = await User
@@ -28,6 +28,8 @@ export const codeSubmission = async (req, res, next) => {
     const newSubmission = new Submission({
       student,
       question : question._id,
+      username,
+      email,
       code,
       language,
       generativeQnA,
@@ -68,7 +70,24 @@ export const getSubmissionbyId = async (req, res, next) => {
       error: error.message,
     });
   }
-}
+};
+
+export const getAllSubmissions = async (req, res) => {
+  try {
+    // Find all Submission documents
+    const submissions = await Submission.find();
+    res.status(200).json({
+      success: true,
+      submissions,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch submissions',
+      error: error.message,
+    });
+  }
+};
 
 export const evaluateSubmission = async (req, res, next) => {
   // res.json({ message: 'evaluateSubmission' });
@@ -105,7 +124,7 @@ export const evaluateSubmission = async (req, res, next) => {
       error: error.message,
     });
   }
-}
+};
 
 export const aiFeedback = async (req, res) => {
   try {
@@ -161,4 +180,23 @@ export const aiFeedback = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+export const updateGradeById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { grade } = req.body;
+
+    await Submission.updateOne({ _id: id }, { grade });
+    res.status(200).json({
+      success: true,
+      message: 'Grade updated successfully',
+    });
+  }catch(error){
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      error
+  });
 }
+};

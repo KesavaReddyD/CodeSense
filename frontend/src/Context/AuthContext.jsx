@@ -30,8 +30,9 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (name , password, role) => {
     const data = await loginapihit(name, password);
+    console.log("loginapihit", data);
     if(data){
-        setUser({name: data.name, email: data.email, role: data.role});
+        setUser({name: data.name, email: data.email, role});
         setisLoggedIN(true);
         setLoading(false);
       }
