@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { useAuth } from '../Context/AuthContext';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 const SUPPORTED_LANGUAGES = [
   { id: 'python', name: 'Python' },
@@ -89,10 +90,18 @@ const CodeSubmissionPage = () => {
   };
 
   const handleSubmit = async () => {
+    // let questionId = "23456fsgs";
+    // let id = "afhewpo";
+    // navigate(`/questions/${questionId}/ai-assessment/${id}`);
+
     setIsSubmitting(true);
     
     try {
+      const lot = toast.loading('Submitting code...');
+      const email = auth?.user?.email;
       const response = await axios.post(`/questions/${questionId}/submit`, {
+        email,
+        questionId,
         code,
         language
       },{
@@ -100,11 +109,12 @@ const CodeSubmissionPage = () => {
       });
       const data = response.data;
       console.log('Submission result:', data);
-      
-      if (data.next_steps) {
-        navigate(`/questions/${questionId}/ai-assessment/${data.next_steps.submission_id}`);
-      }
+      toast.dismiss(lot);
+      toast.success("submitted successfully");
+      navigate(`/questions/${questionId}/ai-assessment/${data.submission._id}`);
     } catch (error) {
+      toast.dismiss();
+      toast.error("error submitting code");
       console.error('Error submitting code:', error);
     } finally {
       setIsSubmitting(false);

@@ -8,6 +8,7 @@ import TeacherDashboard from './Components/TeacherDashboard';
 import StudentDashboard from './Components/StudentDashboard';
 import CodeSubmissionPage from './Components/CodeSubmissionPage';
 import QuizComponent from './Components/QuizComponent';
+import StudentResponseSheet from './Components/ResponseSheet';
 
 const App = () => {
   const auth = useAuth();
@@ -26,6 +27,10 @@ const App = () => {
           element={auth?.user?.role === "teacher" ? <TeacherDashboard/> : <StudentDashboard />}
         />
         <Route path='/question/:questionId' element={<CodeSubmissionPage />} />
+        <Route path='response/:submissionId' element={<StudentResponseSheet />} />
+       
+        {/* <Route path='/happy' element={<QuizComponent/>} /> */}
+        <Route path='/questions/:questionId/ai-assessment/:submissionId' element={<QuizComponent />} />
         <Route path='/quiz' element={<QuizComponent />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
